@@ -15,18 +15,18 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
     @Value("${spring.elasticsearch.uris}")
     private String elasticsearchUrl;
 
-    @Value("${spring.elasticsearch.connect-timeout}")
-    private int connectTimeout;
+    @Value("${spring.elasticsearch.connection-timeout}")
+    private Duration connectTimeout;
 
     @Value("${spring.elasticsearch.socket-timeout}")
-    private int socketTimeout;
+    private Duration socketTimeout;
 
     @Override
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
                 .connectedTo(elasticsearchUrl.replace("http://", ""))
-                .withConnectTimeout(Duration.ofSeconds(connectTimeout))
-                .withSocketTimeout(Duration.ofSeconds(socketTimeout))
+                .withConnectTimeout(connectTimeout)
+                .withSocketTimeout(socketTimeout)
                 .build();
     }
 }

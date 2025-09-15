@@ -1,7 +1,7 @@
 package com.example.elk;
 
 import com.example.elk.model.Product;
-import com.example.elk.service.ProductService;
+import com.example.elk.service.BasicProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -15,7 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SpringElasticsearchExampleApplication implements CommandLineRunner {
 
-    private final ProductService productService;
+    private final BasicProductService basicProductService;
 
     public static void main(String[] args) {
         SpringApplication.run(SpringElasticsearchExampleApplication.class, args);
@@ -29,7 +29,7 @@ public class SpringElasticsearchExampleApplication implements CommandLineRunner 
 
     private void initializeSampleData() {
         // Check if data already exists
-        if (!productService.findAll().isEmpty()) {
+        if (!basicProductService.findAll().isEmpty()) {
             System.out.println("Sample data already exists, skipping initialization...");
             return;
         }
@@ -63,7 +63,7 @@ public class SpringElasticsearchExampleApplication implements CommandLineRunner 
         );
 
         try {
-            productService.saveAll(sampleProducts);
+            basicProductService.saveAll(sampleProducts);
             System.out.println("Sample data initialized successfully!");
         } catch (Exception e) {
             System.err.println("Failed to initialize sample data: " + e.getMessage());
