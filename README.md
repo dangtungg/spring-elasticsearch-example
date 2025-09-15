@@ -1,23 +1,18 @@
 # Spring Boot Elasticsearch Integration Example
 
-A comprehensive Spring Boot application that demonstrates all essential Elasticsearch features with a **clean, modular
-architecture**. This example includes split services and controllers for better organization and readability.
+A comprehensive Spring Boot application that demonstrates all essential Elasticsearch features. This example includes:
 
 ## 🏗️ Architecture Overview
-
-The application uses a **split service & controller design** for better organization:
 
 ### Service Layer:
 
 - **BasicProductService** - Simple CRUD and repository operations
 - **AdvancedSearchService** - Complex Elasticsearch features
-- **ProductService** - Legacy compatibility (deprecated)
 
 ### Controller Layer:
 
 - **BasicProductController** (`/api/products/*`) - Simple operations
 - **AdvancedSearchController** (`/api/search/*`) - Complex search features
-- **ProductController** (`/api/products-legacy/*`) - Legacy compatibility (deprecated)
 
 ## 🚀 Elasticsearch Features Demonstrated:
 
@@ -197,28 +192,6 @@ curl "http://localhost:8080/api/search?query=laptop&page=0&size=10"
 
 # Advanced search with complex filtering
 curl "http://localhost:8080/api/search/advanced?query=gaming&category=Laptops&minPrice=1000&maxPrice=2000&sortBy=price&sortDir=asc"
-```
-
----
-
-## 🔄 Migration Guide
-
-### For New Development:
-
-- **Simple operations**: Use `/api/products/*` endpoints
-- **Complex search**: Use `/api/search/*` endpoints
-
-### Legacy Compatibility:
-
-- Legacy endpoints at `/api/products-legacy/*` still work but are deprecated
-- Gradually migrate to new endpoint structure
-
-```bash
-# OLD (Deprecated)                    # NEW (Recommended)
-/api/products/search          →       /api/search
-/api/products/search/advanced →       /api/search/advanced
-/api/products/aggregations    →       /api/search/aggregations
-/api/products/suggestions     →       /api/search/suggestions
 ```
 
 ---
