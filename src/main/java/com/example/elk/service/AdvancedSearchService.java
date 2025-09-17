@@ -2,10 +2,8 @@ package com.example.elk.service;
 
 import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.PrefixQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.*;
+import co.elastic.clients.util.ObjectBuilder;
 import com.example.elk.model.Product;
 import com.example.elk.model.SearchResponse;
 import com.example.elk.repository.ProductRepository;
@@ -13,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -24,51 +23,11 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * Advanced Search Service - Handles complex Elasticsearch features and search operations
- * <p>
- * Elasticsearch Features Demonstrated:
- * =====================================
- * <p>
- * 1. FULL-TEXT SEARCH:
- * - Multi-field search with relevance scoring
- * - Boolean queries (must, should, filter)
- * - Query boosting for relevance tuning
- * - Minimum should match clauses
- * <p>
- * 2. ADVANCED FILTERING:
- * - Criteria API for complex filtering
- * - Range queries (price, rating, dates)
- * - Term queries for exact matches
- * - Boolean combinations of filters
- * <p>
- * 3. FUZZY SEARCH:
- * - Typo tolerance with fuzziness=AUTO
- * - Edit distance-based matching
- * - Multi-field fuzzy search
- * <p>
- * 4. AGGREGATIONS:
- * - Terms aggregations (category, brand counts)
- * - Histogram aggregations (price ranges)
- * - Metric aggregations (average, sum)
- * - Aggregation processing and formatting
- * <p>
- * 5. SUGGESTIONS/AUTOCOMPLETE:
- * - Prefix queries for type-ahead
- * - Source filtering for performance
- * - Deduplication of suggestions
- * <p>
- * 6. ENHANCED KEYWORD SEARCH:
- * - Repository-based boosted queries
- * - Active product filtering
- * - Multi-field relevance scoring
- * <p>
- * 7. SORTING & PAGINATION:
- * - Score-based sorting
- * - Field-based sorting (price, rating, date)
- * - Paginated results with metadata
  */
 @Slf4j
 @Service
@@ -97,7 +56,7 @@ public class AdvancedSearchService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Query boolQuery = BoolQuery.of(b -> b
+        Function<BoolQuery.Builder, ObjectBuilder<BoolQuery>> func = b -> b
                 .should(MatchQuery.of(m -> m
                         .field("name")
                         .query(query)
@@ -111,8 +70,9 @@ public class AdvancedSearchService {
                 .should(MatchQuery.of(m -> m
                         .field("brand")
                         .query(query))._toQuery())
-                .minimumShouldMatch("1")  // At least one field must match
-        )._toQuery();
+                .minimumShouldMatch("1");  // At least one field must match
+
+        Query boolQuery = BoolQuery.of(func)._toQuery();
 
         NativeQuery searchQuery = NativeQuery.builder()
                 .withQuery(boolQuery)
@@ -129,8 +89,7 @@ public class AdvancedSearchService {
         SearchResponse<Product> response = new SearchResponse<>(products, searchHits.getTotalHits(), page, size);
         response.setSearchTimeMs(System.currentTimeMillis() - startTime);
 
-        log.debug("Full-text search completed in {}ms, found {} results",
-                response.getSearchTimeMs(), searchHits.getTotalHits());
+        log.debug("Full-text search completed in {}ms, found {} results", response.getSearchTimeMs(), searchHits.getTotalHits());
         return response;
     }
 
@@ -149,8 +108,7 @@ public class AdvancedSearchService {
                                                   Double minRating, Boolean inStockOnly,
                                                   int page, int size, String sortBy, String sortDir) {
         long startTime = System.currentTimeMillis();
-        log.debug("Performing advanced search with filters - query: '{}', category: '{}', brand: '{}'",
-                query, category, brand);
+        log.debug("Performing advanced search with filters - query: '{}', category: '{}', brand: '{}'", query, category, brand);
 
         // Build criteria with boolean logic
         Criteria criteria = new Criteria("active").is(true);
@@ -190,24 +148,20 @@ public class AdvancedSearchService {
         }
 
         // Build query with sorting
-        CriteriaQuery criteriaQuery = new CriteriaQuery(criteria)
-                .setPageable(PageRequest.of(page, size));
+        CriteriaQuery criteriaQuery = new CriteriaQuery(criteria).setPageable(PageRequest.of(page, size));
 
         // Add custom sorting
         if (sortBy != null && !sortBy.isEmpty()) {
-            org.springframework.data.domain.Sort.Direction direction =
-                    "desc".equalsIgnoreCase(sortDir) ?
-                            org.springframework.data.domain.Sort.Direction.DESC :
-                            org.springframework.data.domain.Sort.Direction.ASC;
+            Sort.Direction direction = "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC;
 
             switch (sortBy.toLowerCase()) {
                 case "price":
                 case "rating":
                 case "created":
-                    criteriaQuery.addSort(org.springframework.data.domain.Sort.by(direction, sortBy));
+                    criteriaQuery.addSort(Sort.by(direction, sortBy));
                     break;
                 case "name":
-                    criteriaQuery.addSort(org.springframework.data.domain.Sort.by(direction, "name.keyword"));
+                    criteriaQuery.addSort(Sort.by(direction, "name.keyword"));
                     break;
                 default:
                     // Default to relevance scoring
@@ -224,8 +178,7 @@ public class AdvancedSearchService {
         SearchResponse<Product> response = new SearchResponse<>(products, searchHits.getTotalHits(), page, size);
         response.setSearchTimeMs(System.currentTimeMillis() - startTime);
 
-        log.debug("Advanced search completed in {}ms, found {} results",
-                response.getSearchTimeMs(), searchHits.getTotalHits());
+        log.debug("Advanced search completed in {}ms, found {} results", response.getSearchTimeMs(), searchHits.getTotalHits());
         return response;
     }
 
@@ -252,8 +205,7 @@ public class AdvancedSearchService {
             // Use repository-based aggregation for compatibility
             List<Product> allProducts = productRepository.findByActiveTrue();
 
-            Map<String, Long> categoryCounts = allProducts.stream()
-                    .collect(Collectors.groupingBy(Product::getCategory, Collectors.counting()));
+            Map<String, Long> categoryCounts = allProducts.stream().collect(Collectors.groupingBy(Product::getCategory, Collectors.counting()));
 
             Map<String, Long> brandCounts = allProducts.stream()
                     .filter(p -> p.getBrand() != null)
@@ -294,8 +246,7 @@ public class AdvancedSearchService {
             result.put("avgRating", avgRating);
             result.put("totalProducts", totalStock);
 
-            log.debug("Generated aggregations: {} categories, {} brands, avg rating: {}",
-                    categories.size(), brands.size(), avgRating);
+            log.debug("Generated aggregations: {} categories, {} brands, avg rating: {}", categories.size(), brands.size(), avgRating);
 
         } catch (Exception e) {
             log.error("Error generating aggregations", e);
@@ -328,23 +279,27 @@ public class AdvancedSearchService {
         long startTime = System.currentTimeMillis();
         log.debug("Generating suggestions for input: '{}'", input);
 
-        Query boolQuery = BoolQuery.of(b -> b
-                .should(PrefixQuery.of(p -> p
+        Function<BoolQuery.Builder, ObjectBuilder<BoolQuery>> func = b -> b
+                .should(MatchPhrasePrefixQuery.of(m -> m
                         .field("name")
-                        .value(input.toLowerCase()))._toQuery())
+                        .query(input))._toQuery())
+                .should(MatchPhrasePrefixQuery.of(m -> m
+                        .field("description")
+                        .query(input))._toQuery())
                 .should(PrefixQuery.of(p -> p
                         .field("brand")
-                        .value(input.toLowerCase()))._toQuery())
+                        .value(input))._toQuery())
                 .should(PrefixQuery.of(p -> p
                         .field("category")
-                        .value(input.toLowerCase()))._toQuery())
-        )._toQuery();
+                        .value(input))._toQuery());
+
+        Query boolQuery = BoolQuery.of(func)._toQuery();
 
         NativeQuery searchQuery = NativeQuery.builder()
                 .withQuery(boolQuery)
                 .withMaxResults(10)
                 .withSourceFilter(new FetchSourceFilter(
-                        true, new String[]{"name", "brand", "category"}, null))
+                        true, new String[]{"name", "description", "brand", "category"}, null))
                 .build();
 
         SearchHits<Product> searchHits = elasticsearchOperations.search(searchQuery, Product.class);
@@ -352,9 +307,22 @@ public class AdvancedSearchService {
         Set<String> suggestions = new HashSet<>();
         searchHits.forEach(hit -> {
             Product product = hit.getContent();
-            if (product.getName() != null && product.getName().toLowerCase().startsWith(input.toLowerCase())) {
-                suggestions.add(product.getName());
+
+            // For text fields, add words that start with the input
+            if (product.getName() != null) {
+                String[] nameWords = product.getName().split("\\s+");
+                for (String word : nameWords) {
+                    if (word.toLowerCase().startsWith(input.toLowerCase())) {
+                        suggestions.add(word);
+                    }
+                }
+                // Also add the full name if it contains the input
+                if (product.getName().toLowerCase().contains(input.toLowerCase())) {
+                    suggestions.add(product.getName());
+                }
             }
+
+            // For keyword fields, check if they start with the input (case-insensitive)
             if (product.getBrand() != null && product.getBrand().toLowerCase().startsWith(input.toLowerCase())) {
                 suggestions.add(product.getBrand());
             }

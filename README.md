@@ -1,5 +1,8 @@
 # Spring Boot Elasticsearch Integration Example
 
+> - [Elasticsearch Integration Guide: Which Approach to Use When](./ELASTICSEARCH_INTEGRATION_GUIDE.md)
+> - [Elasticsearch Deep Dive: Core Concepts & Mechanisms](./ELASTICSEARCH_DEEP_DIVE.md)
+
 A comprehensive Spring Boot application that demonstrates all essential Elasticsearch features. This example includes:
 
 ## 🏗️ Architecture Overview
@@ -192,33 +195,6 @@ curl "http://localhost:8080/api/search?query=laptop&page=0&size=10"
 
 # Advanced search with complex filtering
 curl "http://localhost:8080/api/search/advanced?query=gaming&category=Laptops&minPrice=1000&maxPrice=2000&sortBy=price&sortDir=asc"
-```
-
----
-
-## 📊 Repository Layer Improvements
-
-### **Readable Text Block Syntax**
-
-Before (Hard to Read):
-
-```java
-@Query("{\"bool\": {\"should\": [{\"match\": {\"name\": \"?0\"}}]}}")
-```
-
-After (Clean & Readable):
-
-```java
-@Query("""
-        {
-          "bool": {
-            "should": [
-              {"match": {"name": "?0"}},
-              {"match": {"description": "?0"}}
-            ]
-          }
-        }
-        """)
 ```
 
 ---

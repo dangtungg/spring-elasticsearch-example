@@ -12,6 +12,7 @@ spring:
 
 logging:
   level:
+    com.example.elk: DEBUG
     org.springframework.data.elasticsearch: DEBUG
     org.elasticsearch: DEBUG
   pattern:

@@ -15,52 +15,6 @@ import java.util.Map;
 
 /**
  * Advanced Search Controller - Handles complex Elasticsearch search operations
- * <p>
- * API Endpoints for Advanced Elasticsearch Features:
- * =================================================
- * <p>
- * Full-text Search:
- * - GET    /api/search                         - Basic full-text search with scoring
- * - GET    /api/search/advanced                - Advanced search with complex filtering
- * <p>
- * Enhanced Search:
- * - GET    /api/search/enhanced                - Enhanced keyword search with boosting
- * - GET    /api/search/fuzzy                   - Fuzzy search for typo tolerance
- * - GET    /api/search/suggestions             - Autocomplete suggestions
- * <p>
- * Analytics:
- * - GET    /api/search/aggregations            - Product aggregations and statistics
- * <p>
- * Elasticsearch Features Demonstrated:
- * ====================================
- * <p>
- * 1. Full-text Search:
- * - Multi-field search with relevance scoring
- * - Boolean queries (must, should, filter)
- * - Query boosting for relevance tuning
- * - Score-based sorting
- * <p>
- * 2. Advanced Filtering:
- * - Criteria API for complex boolean logic
- * - Range queries (price, rating, stock)
- * - Term queries for exact matches
- * - Custom sorting options
- * <p>
- * 3. Fuzzy Search:
- * - Typo tolerance with fuzziness=AUTO
- * - Edit distance-based matching
- * <p>
- * 4. Suggestions/Autocomplete:
- * - Prefix queries for type-ahead
- * - Source filtering for performance
- * <p>
- * 5. Aggregations:
- * - Terms aggregations (categories, brands)
- * - Metric aggregations (averages, sums)
- * <p>
- * 6. Enhanced Repository Queries:
- * - Custom @Query with boosting
- * - Active product filtering
  */
 @Validated
 @RestController

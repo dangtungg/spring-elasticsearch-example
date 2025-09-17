@@ -106,9 +106,17 @@ public interface ProductRepository extends ElasticsearchRepository<Product, Stri
               "bool": {
                 "should": [
                   {
-                    "fuzzy": {
+                    "match": {
                       "name": {
-                        "value": "?0",
+                        "query": "?0",
+                        "fuzziness": "AUTO"
+                      }
+                    }
+                  },
+                  {
+                    "match": {
+                      "description": {
+                        "query": "?0",
                         "fuzziness": "AUTO"
                       }
                     }

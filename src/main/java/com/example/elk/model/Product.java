@@ -13,8 +13,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.elasticsearch.annotations.Setting;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.Instant;
 import java.util.List;
 
 @Setter
@@ -65,17 +64,16 @@ public class Product {
     @Field(type = FieldType.Boolean)
     private Boolean featured = false;
 
-    @Field(type = FieldType.Long)
-    private Long createdAt;
+    @Field(type = FieldType.Date)
+    private Instant createdAt;
 
-    @Field(type = FieldType.Long)
-    private Long updatedAt;
+    @Field(type = FieldType.Date)
+    private Instant updatedAt;
 
     public Product() {
-        LocalDateTime now = LocalDateTime.now().withNano(LocalDateTime.now().getNano() / 1000000 * 1000000);
-        long epochMilli = now.toInstant(ZoneOffset.UTC).toEpochMilli();
-        this.createdAt = epochMilli;
-        this.updatedAt = epochMilli;
+        Instant now = Instant.now();
+        this.createdAt = now;
+        this.updatedAt = now;
     }
 
     public Product(String name, String description, String category, String brand,

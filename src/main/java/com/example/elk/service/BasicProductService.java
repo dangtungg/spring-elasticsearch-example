@@ -9,8 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,9 +39,7 @@ public class BasicProductService {
      * Save a product (create or update)
      */
     public Product save(Product product) {
-        LocalDateTime now = LocalDateTime.now().withNano(LocalDateTime.now().getNano() / 1000000 * 1000000);
-        long epochMilli = now.toInstant(ZoneOffset.UTC).toEpochMilli();
-        product.setUpdatedAt(epochMilli);
+        product.setUpdatedAt(Instant.now());
         log.debug("Saving product: {}", product.getName());
         return productRepository.save(product);
     }
@@ -81,9 +78,8 @@ public class BasicProductService {
      * Save multiple products
      */
     public List<Product> saveAll(List<Product> products) {
-        LocalDateTime now = LocalDateTime.now().withNano(LocalDateTime.now().getNano() / 1000000 * 1000000);
-        long epochMilli = now.toInstant(ZoneOffset.UTC).toEpochMilli();
-        products.forEach(product -> product.setUpdatedAt(epochMilli));
+        Instant now = Instant.now();
+        products.forEach(product -> product.setUpdatedAt(now));
         log.debug("Saving {} products", products.size());
         return (List<Product>) productRepository.saveAll(products);
     }
